@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+// THREE is loaded as a global via <script> tag — no importmap needed for broad browser support
+const THREE = window.THREE;
 
 // ---------------------------------------------------------------------------
 // World land polygons — Natural Earth 50m land, Douglas-Peucker simplified
@@ -825,8 +826,8 @@ function particleColor(t, dark, land) {
 // ---------------------------------------------------------------------------
 const state = {
   isDark: true,
-  particleCount: 50000,
-  globeRadius: 2.8,
+  particleCount: 40000,
+  globeRadius: 2.6,
   autoSpeed: 3,
   particleSize: 0.005,
   damping: 0.93,
@@ -881,11 +882,11 @@ function getPageMargin(w) {
   if (w <= 1024) return 48;
   if (w <= 1280) return 80;
   if (w <= 1440) return 140;
-  return 250;
+  return 220;
 }
 
 // Desktop default radius
-const DESKTOP_DEFAULT_RADIUS = 2.8;
+const DESKTOP_DEFAULT_RADIUS = 2.6;
 
 function updateGlobeOffset() {
   const w = canvas.clientWidth || window.innerWidth;

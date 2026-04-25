@@ -24,7 +24,7 @@
   --btn-hover-bg: rgba(255, 255, 255, 0.10);
   --btn-press-bg: rgba(255, 255, 255, 0.22);
   --btn-border: rgba(255, 255, 255, 0.12);
-  --margin: 250px;
+  --margin: 220px;
 }
 
 body.light {

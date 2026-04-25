@@ -11,13 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=15" />
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js"
-      }
-    }
-  </script>
+  <!-- Load Three.js as a global so globe.js can use it without importmap -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.min.js"></script>
 </head>
 <body class="dark">
   <!-- Background grid: vertical lines with glowing dots -->
@@ -123,12 +118,12 @@
     </div>
     <div class="panel-body">
       <div class="control-row">
-        <span class="control-label">PARTICLES <span id="count-val" class="val">50000</span></span>
-        <input type="range" id="count" min="400" max="100000" step="100" value="50000" />
+        <span class="control-label">PARTICLES <span id="count-val" class="val">40000</span></span>
+        <input type="range" id="count" min="400" max="100000" step="100" value="40000" />
       </div>
       <div class="control-row">
-        <span class="control-label">RADIUS <span id="radius-val" class="val">2.8</span></span>
-        <input type="range" id="radius" min="1.0" max="5.0" step="0.1" value="2.8" />
+        <span class="control-label">RADIUS <span id="radius-val" class="val">2.6</span></span>
+        <input type="range" id="radius" min="1.0" max="5.0" step="0.1" value="2.6" />
       </div>
       <div class="control-row">
         <span class="control-label">SPEED <span id="speed-val" class="val">3</span></span>
@@ -153,6 +148,6 @@
     </div>
   </div>
 
-  <script type="module" src="globe.js?v=13"></script>
+  <script src="globe.js?v=14" defer></script>
 </body>
 </html>
