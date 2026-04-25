@@ -1567,30 +1567,46 @@ document.getElementById('collapse-btn').addEventListener('click', () => {
   }
 
   // Mobile only: dynamically size title font-size so
-  // "AI agents for <longest-word>" fits within (viewport - 2 * page-margin).
+  // "AI agents for <longest-word>" fills the available width edge-to-edge,
+  // respecting the page margin on both sides.
+  // Iterative approach: measure the live element at the current font-size,
+  // compute scale factor, apply, and verify — adjusting if still overflowing.
   function fitTitleToViewport() {
     if (!titleEl) return;
     const viewportW = window.innerWidth;
     if (viewportW > 768) {
-      // Desktop/tablet: clear inline font-size, let CSS rule apply
       titleEl.style.fontSize = '';
       return;
     }
-    const margin = 18; // matches mobile --margin
+    const margin = 18;
     const available = viewportW - margin * 2;
-    // Render the longest word into the cycling span temporarily to measure
-    const orig = el.textContent;
+
+    // Save current cycle state, force longest word + cleared min-width for measurement
+    const prevText = el.textContent;
+    const prevMinW = el.style.minWidth;
+    el.style.minWidth = '0';
     el.textContent = longestWord();
-    // Reset font-size so we measure the natural CSS-defined size first
-    titleEl.style.fontSize = '';
-    let measured = titleEl.getBoundingClientRect().width;
-    if (measured > 0 && measured > available) {
-      // Scale font down proportionally so it fits
-      const cs = parseFloat(getComputedStyle(titleEl).fontSize);
-      const scaled = Math.max(14, Math.floor(cs * (available / measured)));
-      titleEl.style.fontSize = scaled + 'px';
+
+    // Iteratively shrink font-size until live title width fits within `available`.
+    // Start from 32px (a reasonable mobile maximum) and binary-search downward.
+    let lo = 14, hi = 36, best = lo;
+    for (let i = 0; i < 20; i++) {
+      const mid = (lo + hi) / 2;
+      titleEl.style.fontSize = mid + 'px';
+      const w = titleEl.getBoundingClientRect().width;
+      if (w <= available) {
+        best = mid;
+        lo = mid + 0.1;
+      } else {
+        hi = mid - 0.1;
+      }
+      if (hi - lo < 0.15) break;
     }
-    el.textContent = orig;
+    titleEl.style.fontSize = (Math.floor(best * 100) / 100) + 'px';
+
+    // Restore live state
+    el.textContent = prevText;
+    el.style.minWidth = prevMinW;
   }
 
   // Lock cycle-word min-width to the widest word so description never reflows
@@ -1612,7 +1628,15 @@ document.getElementById('collapse-btn').addEventListener('click', () => {
     fitTitleToViewport(); // size font first
     lockWidth();          // then measure widest word at final size
   }
-  recompute();
+  // Run twice: once on initial layout, once after fonts and layout settle
+  requestAnimationFrame(() => {
+    recompute();
+    requestAnimationFrame(recompute);
+  });
+  // Also run when web fonts finish loading (DM Sans width may differ from fallback)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(recompute);
+  }
   window.addEventListener('resize', recompute);
   window.addEventListener('orientationchange', recompute);
 

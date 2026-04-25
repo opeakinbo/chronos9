@@ -554,7 +554,7 @@ input[type="range"]::-moz-range-thumb {
     font-size: clamp(20px, 6vw, 30px);
     white-space: nowrap;
     margin-bottom: 14px;
-    margin-top: 26px; /* 32px × 0.8 — 20% smaller gap from nav */
+    margin-top: 22px; /* 32px × 0.7 — 30% smaller gap from nav */
     text-align: left;
   }
   .hero-desc {
@@ -565,7 +565,7 @@ input[type="range"]::-moz-range-thumb {
   }
   .cta-btn {
     font-size: 16px;
-    padding: 14px 59px;
+    padding: 12px 59px;
     margin-bottom: 0;
   }
 
