@@ -66,12 +66,13 @@ body {
   position: relative;
 }
 
-/* ---------- Canvases ---------- */
+/* ---------- Canvases ----------
+   Both canvases are absolute (not fixed) so they scroll with the page content. */
 #globe-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
   display: block;
   cursor: grab;
   z-index: 0;
@@ -79,18 +80,16 @@ body {
 }
 #globe-canvas:active { cursor: grabbing; }
 
-/* On mobile, the globe canvas should only capture touches within the globe slot */
 @media (max-width: 768px) {
   #globe-canvas { touch-action: auto; pointer-events: none; }
-  /* mobile-globe-slot (below CTA) captures taps and forwards to canvas */
   .mobile-globe-slot { touch-action: none; pointer-events: auto; }
 }
 
 #grid-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
   display: block;
   pointer-events: none;
   z-index: 2;
@@ -259,7 +258,9 @@ body.light .theme-btn .icon-moon { display: block; }
 .mobile-drawer a:hover { color: var(--nav-text); background: var(--btn-hover-bg); }
 .mobile-drawer.open { display: flex; }
 
-/* ---------- Page stack ---------- */
+/* ---------- Page stack ----------
+   100vh layout: hero+globe side-by-side filling viewport, carousel pinned to bottom.
+   Page is naturally scrollable because content below (carousel) starts at bottom of viewport. */
 .page-stack {
   position: relative;
   z-index: 10;
@@ -276,7 +277,6 @@ body.light .theme-btn .icon-moon { display: block; }
   row-gap: 32px;
   pointer-events: none;
 }
-/* Re-enable events on hero content; globe slot stays pass-through */
 #hero { pointer-events: auto; }
 .logo-carousel { pointer-events: auto; }
 
@@ -291,9 +291,10 @@ body.light .theme-btn .icon-moon { display: block; }
 
 .hero-row-wrapper {
   grid-area: globe;
-  pointer-events: none; /* Globe canvas handles events directly */
+  pointer-events: none;
+  height: 100%;
 }
-.hero-globe-slot { pointer-events: none; }
+.hero-globe-slot { pointer-events: none; height: 100%; }
 
 /* Mobile globe slot — hidden on desktop, shown on mobile */
 .mobile-globe-slot { display: none; }
@@ -531,9 +532,9 @@ input[type="range"]::-moz-range-thumb {
   /* Show hamburger on mobile */
   .mobile-menu-btn { display: flex; }
 
-  /* Page stack: single column, nav-height(84) + 24px gap = 108px top */
+  /* Page stack: 100vh column, carousel pinned to bottom */
   .page-stack {
-    padding: 108px 18px 16px;
+    padding: 108px 18px 24px;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -570,16 +571,16 @@ input[type="range"]::-moz-range-thumb {
   .hero-row-wrapper { display: none; }
   .hero-globe-slot { display: none; }
 
-  /* Mobile globe slot: respects page margin on both sides */
+  /* Mobile globe slot: flex-grows between CTA and carousel */
   .mobile-globe-slot {
     display: block;
-    width: 100%;           /* stays within the 18px margin padding of page-stack */
+    width: 100%;
     flex: 1;
-    min-height: 200px;
+    min-height: 280px;
     pointer-events: auto;
   }
 
-  /* Logo carousel pinned at bottom */
+  /* Logo carousel pinned at bottom of 100vh */
   .logo-carousel {
     max-width: 100%;
     margin-top: auto;

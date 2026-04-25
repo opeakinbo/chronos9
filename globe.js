@@ -890,6 +890,16 @@ function getPageMargin(w) {
 // Desktop default radius
 const DESKTOP_DEFAULT_RADIUS = 2.6;
 
+// Forward-declare rebuildTimer so updateGlobeOffset() can call scheduleRebuild()
+let rebuildTimer = 0;
+function scheduleRebuild() {
+  if (rebuildTimer) clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(() => {
+    rebuildTimer = 0;
+    buildGlobe();
+  }, 120);
+}
+
 function updateGlobeOffset() {
   const w = canvas.clientWidth || window.innerWidth;
   const h = canvas.clientHeight || window.innerHeight;
@@ -906,14 +916,15 @@ function updateGlobeOffset() {
       state.globeRadius = mobileR;
       scheduleRebuild();
     }
-    // X: center of available area = center of viewport (margins are symmetric)
+    // X: centered. Y: center on the mobile-globe-slot (canvas top = document top, so use absolute doc position)
     rotGroup.position.x = 0;
-    // Y: vertically center on the mobile-globe-slot
     const slot = document.querySelector('.mobile-globe-slot');
     if (slot) {
       const r = slot.getBoundingClientRect();
-      const slotCenterPx = r.top + r.height / 2;
-      rotGroup.position.y = (h / 2 - slotCenterPx) * worldPerPx;
+      // Document-absolute center of slot
+      const slotCenterDocPx = r.top + window.scrollY + r.height / 2;
+      // Canvas spans top:0 height:100vh, so canvas center in document = h/2
+      rotGroup.position.y = (h / 2 - slotCenterDocPx) * worldPerPx;
     } else {
       rotGroup.position.y = 0;
     }
@@ -934,7 +945,15 @@ function updateGlobeOffset() {
     const rightColRight = w - margin;
     const rightColCenterPx = (rightColLeft + rightColRight) / 2;
     rotGroup.position.x = (rightColCenterPx - w / 2) * worldPerPx;
-    // Y is now updated every frame in animate() via getBoundingClientRect
+    // Y: center on .hero-row-wrapper (uses document-absolute position)
+    const slot = document.querySelector('.hero-row-wrapper');
+    if (slot) {
+      const r = slot.getBoundingClientRect();
+      const slotCenterDocPx = r.top + window.scrollY + r.height / 2;
+      rotGroup.position.y = (h / 2 - slotCenterDocPx) * worldPerPx;
+    } else {
+      rotGroup.position.y = 0;
+    }
   }
 }
 updateGlobeOffset();
@@ -1215,22 +1234,6 @@ function animate() {
   const dt = Math.min((now - prevTime) / 1000, 0.05);
   prevTime = now;
 
-  // Track globe Y to the anchor element every frame — makes globe scroll with page on all sizes.
-  // Uses getBoundingClientRect (already accounts for scroll) — cheap, no scroll listeners needed.
-  {
-    const h = canvas.clientHeight || window.innerHeight;
-    const halfH = camera.position.z * Math.tan((camera.fov / 2) * Math.PI / 180);
-    const worldPerPx = (halfH * 2) / h;
-    const w = canvas.clientWidth || window.innerWidth;
-    const anchorEl = w <= 768 ? _mobileSlot : _desktopSlot;
-    if (anchorEl) {
-      const r = anchorEl.getBoundingClientRect();
-      if (r.height > 0) {
-        rotGroup.position.y = (h / 2 - (r.top + r.height / 2)) * worldPerPx;
-      }
-    }
-  }
-
   rotGroup.rotation.y += 0.0003 * state.autoSpeed;
 
   if (!isDragging) {
@@ -1468,14 +1471,6 @@ function setTheme(dark) {
   renderer.setClearColor(dark ? 0x0B0C10 : 0xF5F2EC, 1);
 }
 
-let rebuildTimer = 0;
-function scheduleRebuild() {
-  if (rebuildTimer) clearTimeout(rebuildTimer);
-  rebuildTimer = setTimeout(() => {
-    rebuildTimer = 0;
-    buildGlobe();
-  }, 120);
-}
 
 function bindSlider(id, valId, stateProp, transform, rebuild, onUpdate) {
   const el = document.getElementById(id);
