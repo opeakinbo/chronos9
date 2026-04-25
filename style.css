@@ -554,7 +554,7 @@ input[type="range"]::-moz-range-thumb {
     font-size: clamp(20px, 6vw, 30px);
     white-space: nowrap;
     margin-bottom: 14px;
-    margin-top: 18px;
+    margin-top: 26px; /* 32px × 0.8 — 20% smaller gap from nav */
     text-align: left;
   }
   .hero-desc {
