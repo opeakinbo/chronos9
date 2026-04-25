@@ -862,6 +862,9 @@ let hoverTargetOffsets = null; // target displacement from hover (smoothly eased
 // Three.js setup
 // ---------------------------------------------------------------------------
 const canvas = document.getElementById('globe-canvas');
+// Cached anchor elements for per-frame scroll tracking
+const _mobileSlot  = document.querySelector('.mobile-globe-slot');
+const _desktopSlot = document.querySelector('.hero-row-wrapper');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 const _initW = canvas.clientWidth || window.innerWidth;
@@ -931,7 +934,7 @@ function updateGlobeOffset() {
     const rightColRight = w - margin;
     const rightColCenterPx = (rightColLeft + rightColRight) / 2;
     rotGroup.position.x = (rightColCenterPx - w / 2) * worldPerPx;
-    rotGroup.position.y = 0;
+    // Y is now updated every frame in animate() via getBoundingClientRect
   }
 }
 updateGlobeOffset();
@@ -1211,6 +1214,22 @@ function animate() {
   const now = performance.now();
   const dt = Math.min((now - prevTime) / 1000, 0.05);
   prevTime = now;
+
+  // Track globe Y to the anchor element every frame — makes globe scroll with page on all sizes.
+  // Uses getBoundingClientRect (already accounts for scroll) — cheap, no scroll listeners needed.
+  {
+    const h = canvas.clientHeight || window.innerHeight;
+    const halfH = camera.position.z * Math.tan((camera.fov / 2) * Math.PI / 180);
+    const worldPerPx = (halfH * 2) / h;
+    const w = canvas.clientWidth || window.innerWidth;
+    const anchorEl = w <= 768 ? _mobileSlot : _desktopSlot;
+    if (anchorEl) {
+      const r = anchorEl.getBoundingClientRect();
+      if (r.height > 0) {
+        rotGroup.position.y = (h / 2 - (r.top + r.height / 2)) * worldPerPx;
+      }
+    }
+  }
 
   rotGroup.rotation.y += 0.0003 * state.autoSpeed;
 

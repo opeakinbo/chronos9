@@ -6,6 +6,7 @@
 
 :root {
   --bg: #0B0C10;
+  --nav-bg: rgba(11, 12, 16, 0.80);
   --panel-bg: rgba(20, 22, 28, 0.82);
   --panel-border: rgba(255, 255, 255, 0.08);
   --text: #8A8A8A;
@@ -29,6 +30,7 @@
 
 body.light {
   --bg: #F5F2EC;
+  --nav-bg: rgba(245, 242, 236, 0.85);
   --panel-bg: rgba(245, 242, 236, 0.82);
   --panel-border: rgba(0, 0, 0, 0.08);
   --text: #6C6C66;
@@ -104,6 +106,11 @@ body {
   align-items: center;
   z-index: 20;
   pointer-events: none;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--panel-border);
+  transition: background 0.4s ease, border-color 0.4s ease;
 }
 #nav > * { pointer-events: auto; }
 
