@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Chronos9 — AI agents for everyone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=15" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js"
+      }
+    }
+  </script>
+</head>
+<body class="dark">
+  <!-- Background grid: vertical lines with glowing dots -->
+  <canvas id="grid-canvas"></canvas>
+  <canvas id="globe-canvas"></canvas>
+
+  <!-- Top Navigation -->
+  <header id="nav">
+    <div class="nav-left">
+      <a href="#" class="logo">Chronos9</a>
+    </div>
+    <nav class="nav-links">
+      <a href="#">Products</a>
+      <a href="#">Pricing</a>
+      <a href="#">Blog</a>
+    </nav>
+    <!-- Right side: sign-up + icon cluster, all in one flex container -->
+    <div class="nav-right">
+      <a href="#" class="nav-signup">Sign up</a>
+      <div class="nav-icons">
+        <!-- Map color toggle: paintbrush icon -->
+        <button id="map-color-btn" class="icon-btn map-color-btn" aria-label="Toggle map particle color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 13.0003L15 15.0003M12 13.0003C7.52 15.7463 4.882 14.7803 3 13.8503C3 15.9303 3.681 17.6703 4.696 19.0003M12 13.0003L15 8.41427M15 15.0003C14.781 17.0373 13.427 21.1853 10.156 22.0003C8.341 22.0003 6.168 20.9303 4.696 19.0003M15 15.0003L17.598 10.0003M4.696 19.0003C5.734 19.1673 8.28 19.2003 10.156 18.0003M15 8.41427L18.808 2.59328C18.9565 2.33239 19.1993 2.1383 19.4864 2.05088C19.7736 1.96347 20.0833 1.98937 20.352 2.12328C20.4895 2.19152 20.6122 2.28625 20.713 2.40203C20.8138 2.51781 20.8908 2.65235 20.9395 2.79794C20.9881 2.94353 21.0076 3.09731 20.9967 3.25044C20.9858 3.40357 20.9448 3.55304 20.876 3.69028L17.598 10.0003M15 8.41427L17.598 10.0003"/>
+            <path d="M6 4L6.221 4.597C6.511 5.381 6.656 5.773 6.941 6.058C7.227 6.344 7.619 6.489 8.403 6.778L9 7L8.403 7.221C7.619 7.511 7.227 7.656 6.942 7.941C6.656 8.227 6.511 8.619 6.222 9.403L6 10L5.779 9.403C5.489 8.619 5.344 8.227 5.059 7.942C4.773 7.656 4.381 7.511 3.597 7.222L3 7L3.597 6.779C4.381 6.489 4.773 6.344 5.058 6.059C5.344 5.773 5.489 5.381 5.778 4.597L6 4Z"/>
+          </svg>
+        </button>
+        <!-- Theme toggle -->
+        <button id="theme-toggle" class="icon-btn theme-btn" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <!-- Hamburger (mobile only) -->
+        <button id="mobile-menu-btn" class="icon-btn mobile-menu-btn" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile nav drawer -->
+  <div id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+    <a href="#">Products</a>
+    <a href="#">Pricing</a>
+    <a href="#">Blog</a>
+    <a href="#" class="nav-signup">Sign up</a>
+  </div>
+
+  <!-- Page layout wrapper -->
+  <div class="page-stack">
+    <!-- Mobile: stacked layout -->
+    <section id="hero">
+      <h1 class="hero-title">
+        AI agents for <span id="cycle-word" class="cycle-word">real estate</span>
+      </h1>
+      <p class="hero-desc">
+        Meet the workforce of the next decade. We build intelligent and specialized AI agents designed to navigate the complexities of modern industry.
+      </p>
+      <button class="cta-btn">Get started</button>
+    </section>
+
+    <!-- Desktop: right column placeholder -->
+    <div class="hero-row-wrapper">
+      <div class="hero-globe-slot" aria-hidden="true"></div>
+    </div>
+
+    <!-- Globe slot for mobile (below CTA) -->
+    <div class="mobile-globe-slot" aria-hidden="true"></div>
+
+    <!-- Logo carousel -->
+    <section id="logo-carousel" class="logo-carousel">
+      <div class="logo-track">
+        <div class="logo-item">Google</div>
+        <div class="logo-item">Amazon</div>
+        <div class="logo-item">Stripe</div>
+        <div class="logo-item">Microsoft</div>
+        <div class="logo-item">Vercel</div>
+        <div class="logo-item">GitHub</div>
+        <div class="logo-item">Coinbase</div>
+        <div class="logo-item">DoorDash</div>
+        <div class="logo-item" aria-hidden="true">Google</div>
+        <div class="logo-item" aria-hidden="true">Amazon</div>
+        <div class="logo-item" aria-hidden="true">Stripe</div>
+        <div class="logo-item" aria-hidden="true">Microsoft</div>
+        <div class="logo-item" aria-hidden="true">Vercel</div>
+        <div class="logo-item" aria-hidden="true">GitHub</div>
+        <div class="logo-item" aria-hidden="true">Coinbase</div>
+        <div class="logo-item" aria-hidden="true">DoorDash</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Globe controls panel -->
+  <div id="controls" class="panel">
+    <div class="panel-header">
+      <span>GLOBE CONTROLS</span>
+      <button id="collapse-btn" class="collapse-btn" aria-label="Toggle panel">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path class="icon-minus" d="M3 8h10"/>
+          <path class="icon-plus" d="M3 8h10M8 3v10"/>
+        </svg>
+      </button>
+    </div>
+    <div class="panel-body">
+      <div class="control-row">
+        <span class="control-label">PARTICLES <span id="count-val" class="val">50000</span></span>
+        <input type="range" id="count" min="400" max="100000" step="100" value="50000" />
+      </div>
+      <div class="control-row">
+        <span class="control-label">RADIUS <span id="radius-val" class="val">2.8</span></span>
+        <input type="range" id="radius" min="1.0" max="5.0" step="0.1" value="2.8" />
+      </div>
+      <div class="control-row">
+        <span class="control-label">SPEED <span id="speed-val" class="val">3</span></span>
+        <input type="range" id="speed" min="0" max="10" step="0.1" value="3" />
+      </div>
+      <div class="control-row">
+        <span class="control-label">SIZE <span id="size-val" class="val">0.005</span></span>
+        <input type="range" id="psize" min="0.001" max="0.30" step="0.001" value="0.005" />
+      </div>
+      <div class="control-row">
+        <span class="control-label">DAMPING <span id="damp-val" class="val">0.93</span></span>
+        <input type="range" id="damping" min="0.80" max="0.99" step="0.01" value="0.93" />
+      </div>
+      <div class="control-row">
+        <span class="control-label">SHAPE</span>
+        <div class="btn-group">
+          <button class="shape-btn active" data-shape="circle" aria-label="Circle">●</button>
+          <button class="shape-btn" data-shape="square" aria-label="Square">■</button>
+          <button class="shape-btn" data-shape="triangle" aria-label="Triangle">▲</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="globe.js?v=13"></script>
+</body>
+</html>
