@@ -549,10 +549,12 @@ input[type="range"]::-moz-range-thumb {
     text-align: left;
   }
   .hero-title {
-    font-size: 30px !important;
+    /* Font size set dynamically by JS so "AI agents for <longest-word>" fits viewport.
+       Falls back to a clamp if JS hasn't run yet. */
+    font-size: clamp(20px, 6vw, 30px);
     white-space: nowrap;
     margin-bottom: 14px;
-    margin-top: 32px;
+    margin-top: 26px; /* 32px × 0.8 — 20% smaller gap from nav */
     text-align: left;
   }
   .hero-desc {
@@ -571,12 +573,15 @@ input[type="range"]::-moz-range-thumb {
   .hero-row-wrapper { display: none; }
   .hero-globe-slot { display: none; }
 
-  /* Mobile globe slot: flex-grows between CTA and carousel */
+  /* Mobile globe slot: flex-grows between CTA and carousel,
+     with 24px breathing room on top and bottom */
   .mobile-globe-slot {
     display: block;
     width: 100%;
     flex: 1;
-    min-height: 280px;
+    min-height: 200px;
+    margin-top: 24px;
+    margin-bottom: 24px;
     pointer-events: auto;
   }
 

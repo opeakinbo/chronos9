@@ -908,22 +908,21 @@ function updateGlobeOffset() {
   const worldPerPx = (halfW * 2) / w;
 
   if (w <= 768) {
-    const margin = getPageMargin(w); // 18px on mobile
-    // Globe diameter = viewport width minus both page margins
-    const availableWidth = w - margin * 2;
-    const mobileR = (availableWidth / 2) * worldPerPx;
-    if (Math.abs(state.globeRadius - mobileR) > 0.03) {
-      state.globeRadius = mobileR;
-      scheduleRebuild();
-    }
-    // X: centered. Y: center on the mobile-globe-slot (canvas top = document top, so use absolute doc position)
     rotGroup.position.x = 0;
     const slot = document.querySelector('.mobile-globe-slot');
     if (slot) {
       const r = slot.getBoundingClientRect();
-      // Document-absolute center of slot
+      // Globe diameter = min(slot width, slot height) so it fits inside the slot
+      const slotW = r.width;
+      const slotH = r.height;
+      const diameter = Math.max(120, Math.min(slotW, slotH));
+      const mobileR = (diameter / 2) * worldPerPx;
+      if (Math.abs(state.globeRadius - mobileR) > 0.03) {
+        state.globeRadius = mobileR;
+        scheduleRebuild();
+      }
+      // Y: center globe on slot in document-absolute coordinates
       const slotCenterDocPx = r.top + window.scrollY + r.height / 2;
-      // Canvas spans top:0 height:100vh, so canvas center in document = h/2
       rotGroup.position.y = (h / 2 - slotCenterDocPx) * worldPerPx;
     } else {
       rotGroup.position.y = 0;
@@ -1418,6 +1417,31 @@ function onPointerMove(e) {
 }
 interactiveTargets.forEach(t => t.addEventListener('pointermove', onPointerMove));
 
+// ---------------------------------------------------------------------------
+// Cross-platform haptic helper.
+// - Android Chrome / Firefox: navigator.vibrate (Web Vibration API).
+// - iOS Safari 17.4+: toggle a hidden <input type="checkbox" switch> to fire
+//   the Taptic Engine. iOS does NOT expose generic vibrate; this is the only
+//   public Web API path to a haptic from a tap.
+// ---------------------------------------------------------------------------
+let _hapticSwitch = null;
+function triggerHaptic() {
+  // Android path
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    try { navigator.vibrate([18, 80, 14, 100, 10]); } catch (_) {}
+  }
+  // iOS path: toggle a hidden switch input to invoke Taptic Engine
+  if (!_hapticSwitch) {
+    _hapticSwitch = document.createElement('input');
+    _hapticSwitch.type = 'checkbox';
+    // Safari 17.4+ recognises the `switch` attribute (HTML standard)
+    _hapticSwitch.setAttribute('switch', '');
+    _hapticSwitch.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;';
+    document.body.appendChild(_hapticSwitch);
+  }
+  try { _hapticSwitch.click(); } catch (_) {}
+}
+
 function onPointerUp(e) {
   if (!isDragging) return;
   isDragging = false;
@@ -1425,14 +1449,13 @@ function onPointerUp(e) {
   if (dragDist < 5) {
     const rect = canvas.getBoundingClientRect();
     const pos = getPointerPos(e);
+    // Trigger haptic FIRST — must happen synchronously in user-gesture handler
+    triggerHaptic();
     spawnLightWave(
       ((pos.x - rect.left) / rect.width) * 2 - 1,
       -((pos.y - rect.top) / rect.height) * 2 + 1
     );
     globeClickPulse = 1.0;
-    // Haptic: pattern mimics the 3 ripples — vibrate, pause, vibrate, pause, vibrate
-    // Each pulse corresponds to one light ring (amplitudes 0.85, 0.60, 0.38 → durations)
-    if (navigator.vibrate) navigator.vibrate([22, 180, 16, 200, 12]);
     velX = 0;
     smoothVelX = 0;
   } else {
@@ -1530,9 +1553,47 @@ document.getElementById('collapse-btn').addEventListener('click', () => {
   const words = ['real estate', 'stock markets', 'governments', 'education', 'music', 'everyone'];
   const el = document.getElementById('cycle-word');
   if (!el) return;
+  const titleEl = el.closest('.hero-title');
 
-  // Pre-measure the widest word and lock the element to that width
-  // so the layout never reflows as words change.
+  // Find the longest word (by rendered width, not char count — accounts for kerning)
+  function longestWord() {
+    let longest = words[0];
+    let maxLen = 0;
+    for (const w of words) {
+      if (w.length > maxLen) { maxLen = w.length; longest = w; }
+    }
+    // 'stock markets' (13 chars w/ space) is widest visually too — confirmed
+    return longest;
+  }
+
+  // Mobile only: dynamically size title font-size so
+  // "AI agents for <longest-word>" fits within (viewport - 2 * page-margin).
+  function fitTitleToViewport() {
+    if (!titleEl) return;
+    const viewportW = window.innerWidth;
+    if (viewportW > 768) {
+      // Desktop/tablet: clear inline font-size, let CSS rule apply
+      titleEl.style.fontSize = '';
+      return;
+    }
+    const margin = 18; // matches mobile --margin
+    const available = viewportW - margin * 2;
+    // Render the longest word into the cycling span temporarily to measure
+    const orig = el.textContent;
+    el.textContent = longestWord();
+    // Reset font-size so we measure the natural CSS-defined size first
+    titleEl.style.fontSize = '';
+    let measured = titleEl.getBoundingClientRect().width;
+    if (measured > 0 && measured > available) {
+      // Scale font down proportionally so it fits
+      const cs = parseFloat(getComputedStyle(titleEl).fontSize);
+      const scaled = Math.max(14, Math.floor(cs * (available / measured)));
+      titleEl.style.fontSize = scaled + 'px';
+    }
+    el.textContent = orig;
+  }
+
+  // Lock cycle-word min-width to the widest word so description never reflows
   function lockWidth() {
     el.style.minWidth = '';
     el.style.display = 'inline-block';
@@ -1546,8 +1607,14 @@ document.getElementById('collapse-btn').addEventListener('click', () => {
     el.textContent = orig;
     el.style.minWidth = maxW + 'px';
   }
-  lockWidth();
-  window.addEventListener('resize', lockWidth);
+
+  function recompute() {
+    fitTitleToViewport(); // size font first
+    lockWidth();          // then measure widest word at final size
+  }
+  recompute();
+  window.addEventListener('resize', recompute);
+  window.addEventListener('orientationchange', recompute);
 
   let idx = 0;
   setInterval(() => {
