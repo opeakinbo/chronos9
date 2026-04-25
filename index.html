@@ -11,8 +11,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=15" />
-  <!-- Load Three.js as a global so globe.js can use it without importmap -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.min.js"></script>
+  <!-- es-module-shims polyfills importmap for browsers that don't support it natively -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.min.js"
+      }
+    }
+  </script>
 </head>
 <body class="dark">
   <!-- Background grid: vertical lines with glowing dots -->
@@ -148,6 +155,6 @@
     </div>
   </div>
 
-  <script src="globe.js?v=14" defer></script>
+  <script type="module" src="globe.js?v=15"></script>
 </body>
 </html>

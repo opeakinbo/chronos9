@@ -1,5 +1,4 @@
-// THREE is loaded as a global via <script> tag — no importmap needed for broad browser support
-const THREE = window.THREE;
+import * as THREE from 'three';
 
 // ---------------------------------------------------------------------------
 // World land polygons — Natural Earth 50m land, Douglas-Peucker simplified
